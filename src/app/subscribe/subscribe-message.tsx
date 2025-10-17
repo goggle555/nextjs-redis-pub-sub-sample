@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
+import logger from "@/util/logger";
 
 export const SubscribeMessage = () => {
   const [isConnected, setIsConnected] = useState(false);
@@ -20,7 +21,7 @@ export const SubscribeMessage = () => {
     const eventSource = new EventSource("/api/subscribe");
 
     eventSource.onopen = () => {
-      console.log("Connected");
+      logger.debug("Connected");
       setIsConnected(true);
     };
 
@@ -28,12 +29,12 @@ export const SubscribeMessage = () => {
       const data: { timestamp: string; message: string } = JSON.parse(
         event.data,
       );
-      console.log(data);
+      logger.debug(data);
       setMessages((prev) => [...prev, data]);
     };
 
     eventSource.onerror = (error) => {
-      console.error(error);
+      logger.error(error);
       setIsConnected(false);
       eventSource.close();
     };
@@ -46,7 +47,7 @@ export const SubscribeMessage = () => {
       ref.current.close();
       ref.current = null;
       setIsConnected(false);
-      console.log("Disconneced");
+      logger.debug("Disconneced");
     }
   };
 
