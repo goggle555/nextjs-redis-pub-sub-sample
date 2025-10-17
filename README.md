@@ -14,4 +14,13 @@ cd nextjs-redis-pub-sub-sample
 
 # 依存関係のインストール
 npm install
+
+# 環境変数を作成
+cp .env.example .env
+
+# Redisを起動
+docker compose up -d
+
+# Next.jsを起動
+npm run dev
 ```
