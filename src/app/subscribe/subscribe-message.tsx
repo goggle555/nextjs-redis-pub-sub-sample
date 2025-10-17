@@ -1,10 +1,11 @@
 "use client";
 
 import { useRef, useState } from "react";
-import logger from "@/util/logger";
 
 export const SubscribeMessage = () => {
-  const [isConnected, setIsConnected] = useState(false);
+  const [connectState, setConnectState] = useState<
+    "Connected" | "Disconneced" | "Waiting"
+  >("Disconneced");
   const [messages, setMessages] = useState<
     {
       timestamp: string;
@@ -20,22 +21,24 @@ export const SubscribeMessage = () => {
 
     const eventSource = new EventSource("/api/subscribe");
 
+    setConnectState("Waiting");
+
     eventSource.onopen = () => {
-      logger.debug("Connected");
-      setIsConnected(true);
+      console.log("Connected");
+      setConnectState("Connected");
     };
 
     eventSource.onmessage = (event) => {
       const data: { timestamp: string; message: string } = JSON.parse(
         event.data,
       );
-      logger.debug(data);
+      console.log(data);
       setMessages((prev) => [...prev, data]);
     };
 
     eventSource.onerror = (error) => {
-      logger.error(error);
-      setIsConnected(false);
+      console.error(error);
+      setConnectState("Disconneced");
       eventSource.close();
     };
 
@@ -46,29 +49,39 @@ export const SubscribeMessage = () => {
     if (ref.current) {
       ref.current.close();
       ref.current = null;
-      setIsConnected(false);
-      logger.debug("Disconneced");
+      setConnectState("Disconneced");
+      console.log("Disconneced");
     }
   };
 
   return (
     <div>
-      <p>Server: {isConnected ? "Connected" : "Disconnected"}</p>
-      {isConnected ? (
-        <button
-          type="button"
-          onClick={disconnect}
-          className="rounded-2xl border border-slate-400 text-slate-500 cursor-pointer p-2"
-        >
-          Disconnect
-        </button>
-      ) : (
+      <p>Server: {connectState}</p>
+      {connectState === "Disconneced" && (
         <button
           type="button"
           onClick={connect}
           className="rounded-2xl border border-slate-400 text-slate-500 cursor-pointer p-2"
         >
           Connect
+        </button>
+      )}
+      {connectState === "Waiting" && (
+        <button
+          type="button"
+          disabled
+          className="rounded-2xl border border-slate-400 text-slate-500 cursor-progress p-2"
+        >
+          Waiting
+        </button>
+      )}
+      {connectState === "Connected" && (
+        <button
+          type="button"
+          onClick={disconnect}
+          className="rounded-2xl border border-slate-400 text-slate-500 cursor-pointer p-2"
+        >
+          Disconnect
         </button>
       )}
       <div>
