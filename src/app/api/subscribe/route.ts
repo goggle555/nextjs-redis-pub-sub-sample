@@ -1,3 +1,5 @@
+import { styleText } from "node:util";
+import logger from "@/util/logger";
 import { createRedisSubscriber } from "@/util/redis";
 
 export const GET = async (request: Request) => {
@@ -18,7 +20,14 @@ export const GET = async (request: Request) => {
       request.signal.addEventListener("abort", async () => {
         await redisSubscriber.unsubscribe("sample-channel");
         await redisSubscriber.quit();
-        controller.close();
+
+        try {
+          controller.close();
+        } catch (error) {
+          if (error instanceof Error) {
+            logger.error(styleText("red", error.message));
+          }
+        }
       });
     },
   });
