@@ -1,11 +1,12 @@
-import { redisSubscriber } from "@/util/redis";
+import { createRedisSubscriber } from "@/util/redis";
 
 export const GET = async (request: Request) => {
   const encoder = new TextEncoder();
 
   const stream = new ReadableStream({
     async start(controller) {
-      await redisSubscriber.subscribe("sample-channel", (message) => {
+      const redisSubscriber = await createRedisSubscriber();
+      redisSubscriber.subscribe("sample-channel", (message) => {
         const data = `data: ${JSON.stringify({
           timestamp: new Date().toISOString(),
           message,

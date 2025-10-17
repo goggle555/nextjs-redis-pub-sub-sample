@@ -2,9 +2,10 @@
 
 import { format } from "node:util";
 import logger from "@/util/logger";
-import { redisPublisher } from "@/util/redis";
+import { getRedisPublisher } from "@/util/redis";
 
 export const PublishAction = async () => {
+  const redisPublisher = await getRedisPublisher();
   const result = await redisPublisher.publish(
     "sample-channel",
     "Hello, world!",
